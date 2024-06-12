@@ -1,0 +1,6 @@
+services:
+  app:
+    image: golang:1.22.4
+    tty: true
+    volumes:
+      - ./:/go/src/scall
