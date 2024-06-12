@@ -5,6 +5,7 @@ import (
 
 	"github.com/yuki-maruyama/playground/go-syscall/cat"
 	"github.com/yuki-maruyama/playground/go-syscall/echo"
+	"github.com/yuki-maruyama/playground/go-syscall/pwd"
 )
 
 func main() {
@@ -19,6 +20,9 @@ func main() {
 
 	case "echo":
 		echo.Echo(flag.Arg(1))
+
+	case "pwd":
+		pwd.Pwd()
 
 	default:
 		return
