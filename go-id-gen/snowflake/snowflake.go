@@ -22,7 +22,7 @@ type snowflake struct {
 }
 
 func New(nodeId *int64) (*snowflake, error) {
-	if nodeId != nil && *nodeId > 1024 {
+	if nodeId != nil && *nodeId > 1024 || *nodeId < 0 {
 		return nil, errors.New("node ID must be between 0 and 1023")
 	}
 	return &snowflake{
