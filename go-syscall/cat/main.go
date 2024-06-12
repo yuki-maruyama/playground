@@ -5,21 +5,20 @@ import (
 )
 
 func Cat(dir string, readFromStdin bool) {
-	var fd int
-	if readFromStdin {
-		fd = 0
-	} else {
+	var fid int = 0
+	if !readFromStdin {
 		fd, err := syscall.Open(dir, syscall.O_RDONLY, 0)
 		if err != nil {
 			syscall.Write(2, []byte("error: file cannot open : "+err.Error()+"\n"))
 			syscall.Exit(1)
 		}
+		fid = fd
 		defer syscall.Close(fd)
 	}
 
 	for {
 		buff := make([]byte, 1024)
-		n, err := syscall.Read(fd, buff)
+		n, err := syscall.Read(fid, buff)
 		if err != nil {
 			syscall.Write(2, []byte("error: file read : "+err.Error()+"\n"))
 			syscall.Exit(1)
@@ -33,5 +32,4 @@ func Cat(dir string, readFromStdin bool) {
 			syscall.Exit(1)
 		}
 	}
-
 }
