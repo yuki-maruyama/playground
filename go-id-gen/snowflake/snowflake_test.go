@@ -3,23 +3,13 @@ package snowflake
 import (
 	"reflect"
 	"testing"
-	"time"
 )
-
-func BenchmarkSnowflake_Gen_FixedTime(b *testing.B) {
-	s, _ := New(nil)
-	t := time.Now()
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = s.Gen(&t)
-	}
-}
 
 func BenchmarkSnowflake_Gen(b *testing.B) {
 	s, _ := New(nil)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_ = s.Gen(nil)
+		_ = s.Gen()
 	}
 }
 
@@ -88,6 +78,9 @@ func Test_snowflake_CompareNewer(t *testing.T) {
 	}
 }
 
+var nodeIdLower = int64(-1)
+var nodeIdUpper = int64(1025)
+
 func TestNew(t *testing.T) {
 	type args struct {
 		nodeId *int64
@@ -100,13 +93,13 @@ func TestNew(t *testing.T) {
 	}{
 		{
 			name:    "nodeid lower bound exception",
-			args:    args{nodeId: getInt64Ptr(int64(-1))},
+			args:    args{nodeId: &nodeIdLower},
 			want:    nil,
 			wantErr: true,
 		},
 		{
 			name:    "nodeid upper bound exception",
-			args:    args{nodeId: getInt64Ptr(int64(1024))},
+			args:    args{nodeId: &nodeIdUpper},
 			want:    nil,
 			wantErr: true,
 		},
@@ -123,54 +116,4 @@ func TestNew(t *testing.T) {
 			}
 		})
 	}
-}
-
-func Test_snowflake_Gen(t *testing.T) {
-	type fields struct {
-		now    int64
-		seq    int16
-		nodeId *int64
-	}
-	type args struct {
-		t *time.Time
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   *int64
-	}{
-		{
-			name: "gen specific time",
-			fields: fields{
-				now:    time.Unix(1560000000, 0).UnixMilli() << 22,
-				seq:    1,
-				nodeId: getInt64Ptr(int64(0)),
-			},
-			args: args{
-				t: getTimePtr(time.Unix(1560000000, 0)),
-			},
-			want: getInt64Ptr(int64(4190209)),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			s := &snowflake{
-				now:    tt.fields.now,
-				seq:    tt.fields.seq,
-				nodeId: tt.fields.nodeId,
-			}
-			if got := s.Gen(tt.args.t); got != tt.want {
-				t.Errorf("snowflake.Gen() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func getInt64Ptr(i int64) *int64 {
-	return &i
-}
-
-func getTimePtr(t time.Time) *time.Time {
-	return &t
 }

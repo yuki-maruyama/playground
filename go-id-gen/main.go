@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/yuki-maruyama/playground/go-id-gen/snowflake"
 )
@@ -14,9 +13,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	for i := 0; i < 100; i++ {
-		t := time.Unix(1560000000, 0)
-		snowFlakeID := *snowflake.Gen(&t)
+	for i := 0; i < 2; i++ {
+		snowFlakeID := snowflake.Gen()
 		fmt.Printf("SnowflakeID: %d\n", snowFlakeID)
 		snowflake.ShowTimestamp(snowFlakeID)
 		snowflake.ShowRandom(snowFlakeID)

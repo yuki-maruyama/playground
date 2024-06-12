@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sync"
 	"time"
 )
 
@@ -16,19 +17,28 @@ import (
 // next 12 bits: sequence number in millis
 
 type snowflake struct {
+	mutex  sync.Mutex
 	now    int64
 	seq    int16
-	nodeId *int64
+	nodeId int64
 }
 
 func New(nodeId *int64) (*snowflake, error) {
-	if nodeId != nil && *nodeId > 1024 || *nodeId < 0 {
+	if nodeId != nil && (*nodeId > 1024 || *nodeId < 0) {
 		return nil, errors.New("node ID must be between 0 and 1023")
+	} else {
+		rid, err := rand.Int(rand.Reader, big.NewInt(1024))
+		if err != nil {
+			return nil, err
+		}
+		id := rid.Int64()
+		nodeId = &id
 	}
 	return &snowflake{
+		mutex:  sync.Mutex{},
 		now:    time.Now().UnixMilli() << 22,
 		seq:    1,
-		nodeId: nodeId,
+		nodeId: *nodeId,
 	}, nil
 }
 
@@ -36,24 +46,11 @@ var timestampBitMask = int64(0x7FFFFFFFFFC00000)
 var randomIdBitMask = int64(0x3FF000)
 var seqNoBitMask = int64(0xFFF)
 
-func (s *snowflake) Gen(t *time.Time) *int64 {
-	var timestamp int64
-	if t != nil {
-		timestamp = t.UnixMilli() << 22
-	} else {
-		timestamp = time.Now().UnixMilli() << 22
-	}
+func (s *snowflake) Gen() int64 {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	var nid int64
-	if s.nodeId != nil {
-		nid = *s.nodeId
-	} else {
-		rid, err := rand.Int(rand.Reader, big.NewInt(1024))
-		if err != nil {
-			return nil
-		}
-		nid = rid.Int64()
-	}
+	var timestamp int64 = time.Now().UnixMilli() & int64(0x7FFFFFFFFFC00000) << 22
 
 	if s.now == timestamp {
 		s.seq++
@@ -62,8 +59,8 @@ func (s *snowflake) Gen(t *time.Time) *int64 {
 		s.now = timestamp
 	}
 
-	var id int64 = 0b0 + timestamp + (nid << 12) + (int64(s.seq) & seqNoBitMask)
-	return &id
+	var id int64 = 0b0 + timestamp + (s.nodeId << 12) + (int64(s.seq) & seqNoBitMask)
+	return id
 }
 
 func (s *snowflake) ShowTimestamp(id int64) {
