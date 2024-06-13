@@ -1,7 +1,7 @@
 package cat
 
 import (
-	"syscall"
+	syscall "golang.org/x/sys/unix"
 )
 
 func Cat(dir string, readFromStdin bool) {

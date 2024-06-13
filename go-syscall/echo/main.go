@@ -1,6 +1,6 @@
 package echo
 
-import "syscall"
+import syscall "golang.org/x/sys/unix"
 
 func Echo(s string) {
 	_, err := syscall.Write(1, []byte(s))
