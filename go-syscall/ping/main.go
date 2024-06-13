@@ -57,7 +57,7 @@ func Ping(addr string) {
 		syscall.Write(2, []byte("error: recvfrom : "+err.Error()+"\n"))
 		syscall.Exit(1)
 	} else {
-		rm, err := icmp.ParseMessage(ipv4.ICMPTypeEcho.Protocol(), recvBuf[20:recvBytes])
+		rm, err := icmp.ParseMessage(ipv4.ICMPTypeEcho.Protocol(), recvBuf[:recvBytes])
 		if err == nil && rm.Type == ipv4.ICMPTypeEchoReply {
 			echo, ok := rm.Body.(*icmp.Echo)
 			if !ok {
