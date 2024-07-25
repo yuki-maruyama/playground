@@ -1,15 +1,24 @@
 //go:build !js
-// +build !js
 
 package main
 
 import (
+	"flag"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 func main() {
-	const width, height = 160, 48
+	flag.Parse()
+	width, err := strconv.Atoi(flag.Arg(0))
+	if err != nil {
+		width = 160
+	}
+	height, err := strconv.Atoi(flag.Arg(1))
+	if err != nil {
+		height = 48
+	}
 	timeStart := time.Now()
 	result := generateMandelbrot(width, height)
 	timeEnd := time.Now()

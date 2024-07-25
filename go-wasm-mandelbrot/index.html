@@ -2,72 +2,63 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandelbrot ASCII Art</title>
-    <style>
-        .box {
-            font-family: Consolas, monaco, monospace, Arial, sans-serif;
-            font-size: 10px;
-            white-space: pre;
-            display: flex;
-            justify-content: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mandelbrot ASCII Art</title>
+  <style>
+    .box {
+      font-family: Consolas, monaco, monospace, Arial, sans-serif;
+      font-size: 10px;
+      white-space: pre;
+      display: flex;
+      justify-content: center;
+    }
 
-        .mandelbrot {
-            font-size: 6px;
-            white-space: pre;
-            border: 1px solid black;
-        }
-    </style>
+    .mandelbrot {
+      font-size: 4px;
+      white-space: pre;
+      border: 1px solid black;
+    }
+  </style>
 </head>
 
 <body>
-    <button id="runButton">Run</button>
-    <div class="time" id="wasm_time"></div>
-    <div class="box">
-        <div class="mandelbrot" id="wasm_mandelbrot"></div>
-    </div>
+  <button id="runButton">Run</button>
+  <input type="number" id="width" value="160" />
+  <input type="number" id="height" value="48" />
 
-    <hr>
+  <hr>
 
-    <div class="time" id="js_time"></div>
-    <div class="box">
-        <div class="mandelbrot" id="js_mandelbrot"></div>
-    </div>
+  <div class="time" id="wasm_time"></div>
+  <div class="box">
+    <div class="mandelbrot" id="wasm_mandelbrot"></div>
+  </div>
 
-    <script src="wasm_exec.js"></script>
-    <script>
-        const go = new Go();
-        const func = WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-            go.run(result.instance);
-        });
-        document.getElementById("runButton").addEventListener("click", async () => {
-            await WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-                go.run(result.instance)
-                const width = 320;
-                const height = 96;
-                const start = performance.now();
-                const asciiArt = generateMandelbrot(width, height);
-                const end = performance.now();
-                document.getElementById("wasm_mandelbrot").textContent = asciiArt;
-                document.getElementById("wasm_time").textContent = `WASM Time: ${end - start}ms`;
-            });
-        });
-    </script>
+  <hr>
 
-    <script src="mandelbrot.js"></script>
-    <script>
-        document.getElementById("runButton").addEventListener("click", async () => {
-            const width = 320;
-            const height = 96;
-            const start = performance.now();
-            const asciiArt = generateMandelbrot(width, height);
-            const end = performance.now();
-            document.getElementById("js_mandelbrot").textContent = asciiArt;
-            document.getElementById("js_time").textContent = `JS Time: ${end - start}ms`;
-        });
-    </script>
+  <div class="time" id="js_time"></div>
+  <div class="box">
+    <div class="mandelbrot" id="js_mandelbrot"></div>
+  </div>
+
+  <script src="wasm_exec.js"></script>
+  <script>
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+      go.run(result.instance)
+    });
+    document.getElementById("runButton").addEventListener("click", async () => {
+      const width = Number(document.getElementById("width").value);
+      const height = Number(document.getElementById("height").value);
+      const start = performance.now();
+      const asciiArt = generateMandelbrot(width, height);
+      const end = performance.now();
+      document.getElementById("wasm_mandelbrot").textContent = asciiArt;
+      document.getElementById("wasm_time").textContent = `WASM Time: ${end - start}ms`;
+    });
+  </script>
+
+  <script src="mandelbrot.js"></script>
 </body>
 
 </html>

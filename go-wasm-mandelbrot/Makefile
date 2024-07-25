@@ -4,6 +4,8 @@ GOARCH := wasm
 GOOS := js
 OUTPUT := main.wasm
 
+all: build tinygo-build build-wasi tinygo-build-wasi
+
 # Build target
 build:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) $(GO) build -o $(OUTPUT) -tags=js --ldflags="-s -w" .
@@ -20,4 +22,4 @@ tinygo-build-wasi:
 
 # Clean target
 clean:
-	rm -f $(OUTPUT)
+	rm -f *.wasm

@@ -1,32 +1,38 @@
-function mandelbrot(c) {
+function mandelbrot(c_re, c_im) {
   const iterations = 1000;
   const escapeRadius = 2.0;
-  let z = { re: 0, im: 0 };
+  let z_re = 0, z_im = 0;
+  let z_re_squared = 0, z_im_squared = 0;
 
   for (let n = 0; n < iterations; n++) {
-    const nextZ = {
-      re: z.re * z.re - z.im * z.im + c.re,
-      im: 2 * z.re * z.im + c.im
-    };
-    z = nextZ;
-    if (Math.sqrt(z.re * z.re + z.im * z.im) > escapeRadius) {
+    z_im = 2 * z_re * z_im + c_im;
+    z_re = z_re_squared - z_im_squared + c_re;
+    z_re_squared = z_re * z_re;
+    z_im_squared = z_im * z_im;
+
+    if (z_re_squared + z_im_squared > escapeRadius * escapeRadius) {
       return n;
     }
   }
   return iterations;
 }
 
-function generateMandelbrot(width, height) {
+function generateMandelbrotJS(width, height) {
   const xmin = -2.0, ymin = -1.5, xmax = 1.0, ymax = 1.5;
-  let art = '';
+  const dx = (xmax - xmin) / width;
+  const dy = (ymax - ymin) / height;
+
+  let art = [];
 
   for (let py = 0; py < height; py++) {
-    const y = ymin + (py / height) * (ymax - ymin);
+    const c_im = ymin + py * dy;
+    let row = '';
+
     for (let px = 0; px < width; px++) {
-      const x = xmin + (px / width) * (xmax - xmin);
-      const c = { re: x, im: y };
-      const m = mandelbrot(c);
+      const c_re = xmin + px * dx;
+      const m = mandelbrot(c_re, c_im);
       let ch;
+
       switch (true) {
         case m < 10:
           ch = ' ';
@@ -46,9 +52,19 @@ function generateMandelbrot(width, height) {
         default:
           ch = '@';
       }
-      art += ch;
+      row += ch;
     }
-    art += '\n';
+    art.push(row);
   }
-  return art;
+  return art.join('\n');
 }
+
+document.getElementById("runButton").addEventListener("click", async () => {
+  const width = Number(document.getElementById("width").value);
+  const height = Number(document.getElementById("height").value);
+  const start = performance.now();
+  const asciiArt = generateMandelbrotJS(width, height);
+  const end = performance.now();
+  document.getElementById("js_mandelbrot").textContent = asciiArt;
+  document.getElementById("js_time").textContent = `JS Time: ${end - start}ms`;
+});
