@@ -1,0 +1,6 @@
+services:
+  dev:
+   image: golang:1.22.3-alpine
+   volumes:
+     - ./:/go/app
+   tty: true
