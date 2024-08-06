@@ -55,7 +55,7 @@ func makeByteSlice(aliginSize uintptr, blockSize uintptr) []byte {
 }
 
 func alignedByteSlice(aliginSize uintptr, blockSize uintptr) []byte {
-	b := make([]byte, aliginSize*(blockSize+2))
+	b := make([]byte, aliginSize*(blockSize+1))
 	a := uintptr(unsafe.Pointer(&b[0])) & (aliginSize - 1)
 	var offset uintptr = 0
 	if a != 0 {
